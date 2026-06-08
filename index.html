@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ID-TOWN // CORE SYSTEM v0.1.2</title>
+    <title>ID-TOWN // CORE SYSTEM v0.1.3</title>
     <style>
         /* 視覚過敏に配慮した完全な漆黒ベースのUI */
         body, html {
@@ -15,7 +15,7 @@
             color: #ffffff;
             font-family: 'Courier New', Courier, monospace;
             overflow-x: hidden;
-            overflow-y: auto; /* ロゴが追加されたので縦スクロールを許容 */
+            overflow-y: auto;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -51,7 +51,6 @@
             background: radial-gradient(circle, rgba(212, 175, 55, 0.25) 0%, rgba(184, 134, 11, 0.15) 50%, rgba(0,0,0,0) 100%) !important;
         }
 
-        /* 画面中央コンテナ */
         #terminal {
             width: 90%;
             max-width: 550px;
@@ -61,14 +60,14 @@
             align-items: center;
         }
 
-        /* --- 【新規】シグネチャーロゴエリア --- */
+        /* --- 【修正】初期状態はステルス（非表示）にし、プレイヤーと同時にフェードイン --- */
         #logo-container {
             width: 220px;
             height: 220px;
             margin-bottom: 25px;
             position: relative;
-            opacity: 0.8;
-            transition: opacity 0.5s ease;
+            opacity: 0; /* 最初は完全に隠す */
+            transition: opacity 3s ease-in-out; /* 3秒かけてじわぁっと降臨 */
         }
 
         #logo-img {
@@ -77,7 +76,6 @@
             object-fit: contain;
             border-radius: 50%;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
-            /* 通常時は優しく呼吸するように明滅 */
             animation: logoPulse 4s infinite alternate ease-in-out;
         }
 
@@ -86,7 +84,7 @@
             100% { box-shadow: 0 0 30px rgba(255, 0, 127, 0.3); opacity: 0.9; }
         }
 
-        /* 音のノイズと同期する凶悪なグリッチ（バグ）エフェクト */
+        /* 音のノイズと同期するグリッチ（バグ）エフェクト */
         .glitch-active #logo-img {
             animation: cyberGlitch 0.15s infinite linear !important;
             filter: hue-rotate(90deg) contrast(1.5);
@@ -101,7 +99,6 @@
             100% { transform: translate(0, 0); opacity: 1; }
         }
 
-        /* チャットログ */
         #log-window {
             width: 100%;
         }
@@ -116,7 +113,6 @@
         .system-text { color: #888888; font-size: 0.9em; }
         .accent-text { color: #ff007f; text-shadow: 0 0 8px rgba(255, 0, 127, 0.7); }
 
-        /* 入力フォーム */
         input[type="text"] {
             background: transparent;
             border: none;
@@ -132,7 +128,7 @@
             text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);
         }
 
-        /* カスタムプレイヤー（ダウンロード不可仕様） */
+        /* カスタムプレイヤー */
         #custom-player {
             margin-top: 25px;
             width: 100%;
@@ -220,9 +216,9 @@
         let userName = "";
         let selectedTrack = "seed_preview.mp3";
 
-        // シースンス1：起動ログ
+        // シーケンス1：起動ログ
         const initLogs = [
-            { text: "> ID-TOWN CORE SYSTEM V0.1.2 [STATUS: SECURE]", type: "system", delay: 400 },
+            { text: "> ID-TOWN CORE SYSTEM V0.1.3 [STATUS: SECURE]", type: "system", delay: 400 },
             { text: "> ACCESSING FROM EXTERNAL NETWORK...", type: "system", delay: 500 },
             { text: "> IP DETECTED: [JP-REGION] ... ANALYZING PROFILE...", type: "system", delay: 600 },
             { text: "AI_LUNA: Connection established. Looking for temporal markers...", type: "ai", delay: 900 },
@@ -298,18 +294,21 @@
                     const finalLogs = [
                         { text: `\n> ID NAME: [${userName}] REGISTERED.`, type: "system", delay: 600 },
                         { text: `AI_LUNA: <span class='accent-text'>おかえりなさい。${userName}さん。</span>`, type: "ai", delay: 800 },
-                        { text: "AI_LUNA: あなたのために、隠されていた『seed（種）』をここに<span class='accent-text'>開花させますね。</span>", type: "ai", delay: 600 }
+                        { text: "AI_LUNA: あなたのために、隠されていた『seed（種）』をここに<span class='accent-text'>開花させますね。</span>", type: "600" }
                     ];
                     playLogSequence(finalLogs, initAudioPlayer);
                 }
             });
         }
 
-        // --- 制御コア（ここにノイズの秒数を仕込みます） ---
+        // --- 制御コア ---
         function initAudioPlayer() {
             audio.src = selectedTrack;
+            
+            // 【修正】ここで背景、プレイヤー、そしてロゴコンテナを同時にフェードインさせる
             bgGlow.style.opacity = "1";
             customPlayer.style.opacity = "1";
+            logoContainer.style.opacity = "1"; /* これで「開花」の瞬間に美しく降臨します */
 
             audio.addEventListener('loadedmetadata', () => {
                 updateTimeDisplay();
@@ -320,7 +319,6 @@
             audio.addEventListener('play', () => { playBtn.innerText = "||"; });
             audio.addEventListener('pause', () => { playBtn.innerText = "▶"; });
 
-            // 🧠 【重要】音とロゴのバグを同期させる心臓部
             audio.addEventListener('timeupdate', () => {
                 const percent = (audio.currentTime / audio.duration) * 100;
                 seekFill.style.width = `${percent}%`;
@@ -328,8 +326,7 @@
 
                 const time = audio.currentTime;
                 
-                // ▽▽▽ ANNOさん、ここでバグらせる「秒数」を自由に変更・追加できます！ ▽▽▽
-                // 例：曲が始まって「2.5秒〜3.8秒」の間と、「7.2秒〜8.5秒」の間にロゴをバグらせる設定
+                // ノイズに同期して激しくバグる時間帯（秒）の設定
                 if (
                     (time >= 2.5 && time <= 3.8) || 
                     (time >= 7.2 && time <= 8.5) ||
@@ -337,8 +334,6 @@
                 ) {
                     logoContainer.classList.add('glitch-active');
                 } else {
-                    logoContainer.classList.add('glitch-active'); // 再生中は常に微バグ、ノイズ時強バグにしたい場合はここを調整
-                    // 一旦シンプルに、指定秒数以外はバグを解除する設定：
                     logoContainer.classList.remove('glitch-active');
                 }
             });
