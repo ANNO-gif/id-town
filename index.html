@@ -328,9 +328,12 @@
                 
                 // ノイズに同期して激しくバグる時間帯（秒）の設定
                 if (
-                    (time >= 2.5 && time <= 3.8) || 
-                    (time >= 7.2 && time <= 8.5) ||
-                    (time >= 12.0 && time <= 13.2)
+                    (time >= 3.233 && time <= 4.076) || 
+                    (time >= 5.164 && time <= 5.244) ||
+                    (time >= 7.052 && time <= 7.120) ||
+                    (time >= 10.207 && time <= 10.214)||
+                    (time >= 11.045 && time <= 11.052) ||
+                    (time >= 14.006 && time <= 14.110) 
                 ) {
                     logoContainer.classList.add('glitch-active');
                 } else {
