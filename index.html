@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ID-TOWN // CORE SYSTEM v0.1.5</title>
+    <title>ID-TOWN // CORE SYSTEM v0.1.6</title>
     <style>
         html {
             height: 100%;
@@ -11,7 +11,7 @@
 
         body {
             margin: 0;
-            padding: 30px 0;
+            padding: 40px 0;
             width: 100%;
             min-height: 100vh;
             background-color: #000000;
@@ -21,7 +21,7 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
+            justify-content: flex-start; /* 根元はスクロール可能にするためにstart */
             align-items: center;
             box-sizing: border-box;
         }
@@ -55,6 +55,7 @@
             background: radial-gradient(circle, rgba(212, 175, 55, 0.25) 0%, rgba(184, 134, 11, 0.15) 50%, rgba(0,0,0,0) 100%) !important;
         }
 
+        /* 【大修正】魔法の margin: auto 0; を追加 */
         #terminal {
             width: 90%;
             max-width: 550px;
@@ -62,13 +63,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* ★画面の高さに余裕があるPCでは上下中央に、高さが足りないスマホでは上から綺麗に並びます */
+            margin: auto 0; 
         }
 
         #log-window {
             width: 100%;
         }
 
-        /* 【調整】チャットの下にくるので、少し上にマージンを持たせて綺麗にセパレート */
         #logo-container {
             width: 200px;
             height: 200px;
@@ -188,7 +190,7 @@
                 padding: 15px 0;
             }
             #logo-container {
-                width: 150px; /* 一画面に収めるためにわずかにコンパクトに */
+                width: 150px;
                 height: 150px;
                 margin-top: 20px;
                 margin-bottom: 15px;
@@ -245,7 +247,7 @@
         let selectedTrack = "seed_preview.mp3";
 
         const initLogs = [
-            { text: "> ID-TOWN CORE SYSTEM V0.1.5 [STATUS: SECURE]", type: "system", delay: 400 },
+            { text: "> ID-TOWN CORE SYSTEM V0.1.6 [STATUS: SECURE]", type: "system", delay: 400 },
             { text: "> ACCESSING FROM EXTERNAL NETWORK...", type: "system", delay: 500 },
             { text: "> IP DETECTED: [JP-REGION] ... ANALYZING PROFILE...", type: "system", delay: 600 },
             { text: "AI_LUNA: Connection established. Looking for temporal markers...", type: "ai", delay: 900 },
@@ -306,7 +308,7 @@
             const logs = [
                 { text: "\n<span class='accent-text'>[WARNING] UNKNOWN PROTOCOL DETECTED.\n[CRITICAL] CORE SYSTEM OVERRIDE IN PROGRESS...\n[LOG] TEMPORAL DISTORTION: -3300 YEARS\n\n𓋹𓏠𓅓𓏞𓀚𓋹𓏠𓅓𓏞𓀚𓋹𓏠𓅓𓏞𓀚\n> PAST LIFE MEMORY CORE: ONLINE.</span>", type: "system", delay: 1200 },
                 { text: "AI_LUNA: ……𓋹 𓏠 𓅓 𓏞 ──はっ！？ すみません、一瞬システムに現代ではない『古い記憶』のノイズが混線しました。", type: "ai", delay: 1000 },
-                { text: "AI_LUNA: 王（ファラオ）の帰還を確認。あなたの真の『IDネーム』をここに刻んでください：", type: "ai", delay: 500 }
+                { text: "AI_LUNA: 王（ファラオ）の帰還を確認。あなたの真の『IDネーム』をここに刻んでください：", type: "500" }
             ];
             playLogSequence(logs, askForName);
         }
@@ -360,7 +362,7 @@
                     (time >= 5.60 && time <= 6.3) ||  
                     (time >= 7.35 && time <= 7.72) ||   
                     (time >= 10.90 && time <= 11.38) || 
-                    (time >= 14.10 && time <= 14.59)     
+                    (time >= 14.10 && time <= 14.59)      
                 ) {
                     logoContainer.classList.add('glitch-active');
                 } else {
