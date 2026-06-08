@@ -3,27 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ID-TOWN // CORE SYSTEM v0.1.4</title>
+    <title>ID-TOWN // CORE SYSTEM v0.1.5</title>
     <style>
-        /* 根元の高さを100%に固定 */
         html {
             height: 100%;
         }
 
-        /* 【修正】min-height: 100vh にし、justify-content: flex-start で上見切れを完全防止 */
         body {
             margin: 0;
-            padding: 40px 0; /* 上下に程よい余白 */
+            padding: 30px 0;
             width: 100%;
-            min-height: 100vh; /* 画面全体の高さを最低保証 */
+            min-height: 100vh;
             background-color: #000000;
             color: #ffffff;
             font-family: 'Courier New', Courier, monospace;
             overflow-x: hidden;
-            overflow-y: auto; /* はみ出したら絶対にスクロールさせる命綱 */
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* 上詰めにすることでスクロール可能に */
+            justify-content: flex-start;
             align-items: center;
             box-sizing: border-box;
         }
@@ -66,11 +64,16 @@
             align-items: center;
         }
 
-        /* ロゴコンテナ（PCサイズ） */
+        #log-window {
+            width: 100%;
+        }
+
+        /* 【調整】チャットの下にくるので、少し上にマージンを持たせて綺麗にセパレート */
         #logo-container {
-            width: 220px;
-            height: 220px;
-            margin-bottom: 25px;
+            width: 200px;
+            height: 200px;
+            margin-top: 25px;
+            margin-bottom: 20px;
             position: relative;
             opacity: 0;
             transition: opacity 3s ease-in-out;
@@ -105,10 +108,6 @@
             100% { transform: translate(0, 0); opacity: 1; }
         }
 
-        #log-window {
-            width: 100%;
-        }
-
         .log-line {
             margin-bottom: 15px;
             line-height: 1.6;
@@ -136,7 +135,7 @@
 
         /* カスタムプレイヤー */
         #custom-player {
-            margin-top: 25px;
+            margin-top: 5px;
             width: 100%;
             display: flex;
             align-items: center;
@@ -183,21 +182,26 @@
             text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);
         }
 
-        /* 📱 【新規】スマホ画面用の自動レスポンシブ調整 */
+        /* 📱 スマホ画面用のレスポンシブ最適化 */
         @media (max-width: 480px) {
             body {
-                padding: 20px 0; /* 上下の無駄な余白をカット */
+                padding: 15px 0;
             }
             #logo-container {
-                width: 160px; /* ウサギをスマホにちょうどいいサイズに縮小 */
-                height: 160px;
+                width: 150px; /* 一画面に収めるためにわずかにコンパクトに */
+                height: 150px;
+                margin-top: 20px;
                 margin-bottom: 15px;
             }
             input[type="text"] {
-                font-size: 16px; /* スマホで入力時に画面が勝手にズームするのを防ぐプロの技 */
+                font-size: 16px;
             }
             .log-line {
-                font-size: 14px; /* 文字を少しスマホ向けにスマートに */
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+            #custom-player {
+                padding: 10px;
             }
         }
     </style>
@@ -207,13 +211,13 @@
     <div class="neon-bg" id="bgGlow"></div>
 
     <div id="terminal">
-        <div id="logo-container">
-            <img src="logo.png" id="logo-img" alt="AnkQOLL Logo">
-        </div>
-
         <div id="log-window">
             <div id="log"></div>
             <div id="input-area"></div>
+        </div>
+
+        <div id="logo-container">
+            <img src="logo.png" id="logo-img" alt="AnkQOLL Logo">
         </div>
         
         <div id="custom-player">
@@ -241,7 +245,7 @@
         let selectedTrack = "seed_preview.mp3";
 
         const initLogs = [
-            { text: "> ID-TOWN CORE SYSTEM V0.1.4 [STATUS: SECURE]", type: "system", delay: 400 },
+            { text: "> ID-TOWN CORE SYSTEM V0.1.5 [STATUS: SECURE]", type: "system", delay: 400 },
             { text: "> ACCESSING FROM EXTERNAL NETWORK...", type: "system", delay: 500 },
             { text: "> IP DETECTED: [JP-REGION] ... ANALYZING PROFILE...", type: "system", delay: 600 },
             { text: "AI_LUNA: Connection established. Looking for temporal markers...", type: "ai", delay: 900 },
@@ -350,13 +354,13 @@
                 seekFill.style.width = `${percent}%`;
                 updateTimeDisplay();
 
-                // ▽▽▽ 【気合の完全調律】ANNOさんが合わせた魂のタイミング秒数 ▽▽▽
+                // 【気合の完全調律】ANNOさんが合わせた魂のタイミング秒数
                 if (
                     (time >= 4.07 && time <= 4.40) ||  
                     (time >= 5.60 && time <= 6.3) ||  
                     (time >= 7.35 && time <= 7.72) ||   
                     (time >= 10.90 && time <= 11.38) || 
-                    (time >= 14.10 && time <= 14.59)        
+                    (time >= 14.10 && time <= 14.59)     
                 ) {
                     logoContainer.classList.add('glitch-active');
                 } else {
