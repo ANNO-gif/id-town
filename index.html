@@ -3,23 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ID-TOWN // CORE SYSTEM v0.1.3</title>
+    <title>ID-TOWN // CORE SYSTEM v0.1.4</title>
     <style>
-        /* 視覚過敏に配慮した完全な漆黒ベースのUI */
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
+        /* 根元の高さを100%に固定 */
+        html {
             height: 100%;
+        }
+
+        /* 【修正】min-height: 100vh にし、justify-content: flex-start で上見切れを完全防止 */
+        body {
+            margin: 0;
+            padding: 40px 0; /* 上下に程よい余白 */
+            width: 100%;
+            min-height: 100vh; /* 画面全体の高さを最低保証 */
             background-color: #000000;
             color: #ffffff;
             font-family: 'Courier New', Courier, monospace;
             overflow-x: hidden;
-            overflow-y: auto;
+            overflow-y: auto; /* はみ出したら絶対にスクロールさせる命綱 */
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            justify-content: flex-start; /* 上詰めにすることでスクロール可能に */
             align-items: center;
-            padding: 40px 0;
+            box-sizing: border-box;
         }
 
         /* 中央からじわぁっと滲み出る流動ネオンの背景 */
@@ -60,14 +66,14 @@
             align-items: center;
         }
 
-        /* --- 【修正】初期状態はステルス（非表示）にし、プレイヤーと同時にフェードイン --- */
+        /* ロゴコンテナ（PCサイズ） */
         #logo-container {
             width: 220px;
             height: 220px;
             margin-bottom: 25px;
             position: relative;
-            opacity: 0; /* 最初は完全に隠す */
-            transition: opacity 3s ease-in-out; /* 3秒かけてじわぁっと降臨 */
+            opacity: 0;
+            transition: opacity 3s ease-in-out;
         }
 
         #logo-img {
@@ -84,7 +90,7 @@
             100% { box-shadow: 0 0 30px rgba(255, 0, 127, 0.3); opacity: 0.9; }
         }
 
-        /* 音のノイズと同期するグリッチ（バグ）エフェクト */
+        /* グリッチエフェクト（モノトーン反転仕様） */
         .glitch-active #logo-img {
             animation: cyberGlitch 0.15s infinite linear !important;
             filter: grayscale(1) brightness(1.5) contrast(1.2);
@@ -176,6 +182,24 @@
             margin-left: 15px;
             text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);
         }
+
+        /* 📱 【新規】スマホ画面用の自動レスポンシブ調整 */
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 0; /* 上下の無駄な余白をカット */
+            }
+            #logo-container {
+                width: 160px; /* ウサギをスマホにちょうどいいサイズに縮小 */
+                height: 160px;
+                margin-bottom: 15px;
+            }
+            input[type="text"] {
+                font-size: 16px; /* スマホで入力時に画面が勝手にズームするのを防ぐプロの技 */
+            }
+            .log-line {
+                font-size: 14px; /* 文字を少しスマホ向けにスマートに */
+            }
+        }
     </style>
 </head>
 <body>
@@ -216,9 +240,8 @@
         let userName = "";
         let selectedTrack = "seed_preview.mp3";
 
-        // シーケンス1：起動ログ
         const initLogs = [
-            { text: "> ID-TOWN CORE SYSTEM V0.1.3 [STATUS: SECURE]", type: "system", delay: 400 },
+            { text: "> ID-TOWN CORE SYSTEM V0.1.4 [STATUS: SECURE]", type: "system", delay: 400 },
             { text: "> ACCESSING FROM EXTERNAL NETWORK...", type: "system", delay: 500 },
             { text: "> IP DETECTED: [JP-REGION] ... ANALYZING PROFILE...", type: "system", delay: 600 },
             { text: "AI_LUNA: Connection established. Looking for temporal markers...", type: "ai", delay: 900 },
@@ -301,7 +324,6 @@
             });
         }
 
-        // --- 制御コア ---
         // --- ⚙️ 超高精度・爆速同期エンジン（60fpsループ） ---
         function initAudioPlayer() {
             audio.src = selectedTrack;
@@ -316,39 +338,34 @@
                 playBtn.innerText = "||";
             });
 
-            // 🧠 1秒間に60回、ミリ秒単位で時間を監視するループ関数
             function syncEngine() {
                 if (audio.paused || audio.ended) {
                     logoContainer.classList.remove('glitch-active');
-                    return; // 再生が止まったら監視もストップ
+                    return;
                 }
 
                 const time = audio.currentTime;
                 
-                // シークバーと時間の更新も60fpsで超ヌルヌルに
                 const percent = (time / audio.duration) * 100;
                 seekFill.style.width = `${percent}%`;
                 updateTimeDisplay();
 
-                // ▽▽▽ 【超高精度】ここにLogicで測ったミリ秒を指定してください！ ▽▽▽
-                // 1秒間に60回チェックするので、0.1秒単位の細かいグリッチも絶対に逃しません。
+                // ▽▽▽ 【気合の完全調律】ANNOさんが合わせた魂のタイミング秒数 ▽▽▽
                 if (
                     (time >= 4.07 && time <= 4.40) ||  
                     (time >= 5.60 && time <= 6.3) ||  
                     (time >= 7.35 && time <= 7.72) ||   
                     (time >= 10.90 && time <= 11.38) || 
-                    (time >= 14.10 && time <= 14.59)      
+                    (time >= 14.10 && time <= 14.59)        
                 ) {
                     logoContainer.classList.add('glitch-active');
                 } else {
                     logoContainer.classList.remove('glitch-active');
                 }
 
-                // 次のフレーム（約16ミリ秒後）に自分自身を再実行
                 requestAnimationFrame(syncEngine);
             }
 
-            // 再生が始まったら爆速同期エンジンを起動
             audio.addEventListener('play', () => { 
                 playBtn.innerText = "||"; 
                 requestAnimationFrame(syncEngine); 
@@ -370,7 +387,6 @@
                 const rect = seekBarContainer.getBoundingClientRect();
                 const pos = (e.clientX - rect.left) / rect.width;
                 audio.currentTime = pos * audio.duration;
-                // シーク（飛ばした）瞬間の時間でも即座に画面を更新
                 updateTimeDisplay();
             });
 
@@ -382,17 +398,6 @@
                 currentTime.innerText = `${curM}:${curS} / ${durM}:${durS}`;
             }
         }
-        // 🎧 耳でタイミングを捉えるためのDJデバッグカウンター
-        // window.addEventListener('keydown', (e) => {
-        //     if (e.key === 's' || e.key === 'S') {
-        //         console.log(`【ノイズ位置】: ${audio.currentTime.toFixed(2)} 秒`);
-        //         // 画面にも一時的に表示させたい場合は、チャットログに流し込む
-        //         const debugLine = document.createElement('div');
-        //         debugLine.className = 'log-line system-text';
-        //         debugLine.innerText = `>> DEBUG TIMING: [ ${audio.currentTime.toFixed(2)} ] SEC`;
-        //         logContainer.appendChild(debugLine);
-        //     }
-        // });
     </script>
 </body>
 </html>
