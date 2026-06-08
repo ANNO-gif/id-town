@@ -302,13 +302,13 @@
         }
 
         // --- 制御コア ---
+        // --- ⚙️ 超高精度・爆速同期エンジン（60fpsループ） ---
         function initAudioPlayer() {
             audio.src = selectedTrack;
             
-            // 【修正】ここで背景、プレイヤー、そしてロゴコンテナを同時にフェードインさせる
             bgGlow.style.opacity = "1";
             customPlayer.style.opacity = "1";
-            logoContainer.style.opacity = "1"; /* これで「開花」の瞬間に美しく降臨します */
+            logoContainer.style.opacity = "1";
 
             audio.addEventListener('loadedmetadata', () => {
                 updateTimeDisplay();
@@ -316,31 +316,43 @@
                 playBtn.innerText = "||";
             });
 
-            audio.addEventListener('play', () => { playBtn.innerText = "||"; });
-            audio.addEventListener('pause', () => { playBtn.innerText = "▶"; });
-
-            audio.addEventListener('timeupdate', () => {
-                const percent = (audio.currentTime / audio.duration) * 100;
-                seekFill.style.width = `${percent}%`;
-                updateTimeDisplay();
+            // 🧠 1秒間に60回、ミリ秒単位で時間を監視するループ関数
+            function syncEngine() {
+                if (audio.paused || audio.ended) {
+                    logoContainer.classList.remove('glitch-active');
+                    return; // 再生が止まったら監視もストップ
+                }
 
                 const time = audio.currentTime;
                 
-                // ノイズに同期して激しくバグる時間帯（秒）の設定
+                // シークバーと時間の更新も60fpsで超ヌルヌルに
+                const percent = (time / audio.duration) * 100;
+                seekFill.style.width = `${percent}%`;
+                updateTimeDisplay();
+
+                // ▽▽▽ 【超高精度】ここにLogicで測ったミリ秒を指定してください！ ▽▽▽
+                // 1秒間に60回チェックするので、0.1秒単位の細かいグリッチも絶対に逃しません。
                 if (
-                    (time >= 3.233 && time <= 4.076) || 
-                    (time >= 5.164 && time <= 5.244) ||
-                    (time >= 7.052 && time <= 7.120) ||
-                    (time >= 10.207 && time <= 10.214)||
-                    (time >= 11.045 && time <= 11.052) ||
-                    (time >= 14.006 && time <= 14.110) 
+                    (time >= 1.2 && time <= 1.5) ||  // 細かいノイズ1発目
+                    (time >= 1.7 && time <= 1.9) ||  // 連打ノイズ
+                    (time >= 5.4 && time <= 5.8)     // ブリッジ前のバグ
                 ) {
                     logoContainer.classList.add('glitch-active');
                 } else {
                     logoContainer.classList.remove('glitch-active');
                 }
-            });
 
+                // 次のフレーム（約16ミリ秒後）に自分自身を再実行
+                requestAnimationFrame(syncEngine);
+            }
+
+            // 再生が始まったら爆速同期エンジンを起動
+            audio.addEventListener('play', () => { 
+                playBtn.innerText = "||"; 
+                requestAnimationFrame(syncEngine); 
+            });
+            
+            audio.addEventListener('pause', () => { playBtn.innerText = "▶"; });
             audio.addEventListener('ended', () => {
                 playBtn.innerText = "▶";
                 seekFill.style.width = "0%";
@@ -356,6 +368,8 @@
                 const rect = seekBarContainer.getBoundingClientRect();
                 const pos = (e.clientX - rect.left) / rect.width;
                 audio.currentTime = pos * audio.duration;
+                // シーク（飛ばした）瞬間の時間でも即座に画面を更新
+                updateTimeDisplay();
             });
 
             function updateTimeDisplay() {
