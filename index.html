@@ -87,7 +87,7 @@
         /* 音のノイズと同期するグリッチ（バグ）エフェクト */
         .glitch-active #logo-img {
             animation: cyberGlitch 0.15s infinite linear !important;
-            filter: hue-rotate(90deg) contrast(1.5);
+            filter: grayscale(1) brightness(1.5) contrast(1.2);
         }
 
         @keyframes cyberGlitch {
@@ -333,9 +333,9 @@
                 // ▽▽▽ 【超高精度】ここにLogicで測ったミリ秒を指定してください！ ▽▽▽
                 // 1秒間に60回チェックするので、0.1秒単位の細かいグリッチも絶対に逃しません。
                 if (
-                    (time >= 4.11 && time <= 4.40) ||  
+                    (time >= 4.08 && time <= 4.40) ||  
                     (time >= 5.60 && time <= 6.3) ||  
-                    (time >= 7.42 && time <= 7.72) ||   
+                    (time >= 7.40 && time <= 7.72) ||   
                     (time >= 10.90 && time <= 11.38) || 
                     (time >= 14.10 && time <= 14.59)      
                 ) {
