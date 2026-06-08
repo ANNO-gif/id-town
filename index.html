@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ID-TOWN // CORE SYSTEM v0.1.1</title>
+    <title>ID-TOWN // CORE SYSTEM v0.1.2</title>
     <style>
         /* 視覚過敏に配慮した完全な漆黒ベースのUI */
         body, html {
@@ -12,50 +12,98 @@
             width: 100%;
             height: 100%;
             background-color: #000000;
-            color: #ffffff; /* デフォルトの文字色を白に */
+            color: #ffffff;
             font-family: 'Courier New', Courier, monospace;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto; /* ロゴが追加されたので縦スクロールを許容 */
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 40px 0;
         }
 
-        /* 中央からじわぁっと滲み出る流動ネオンの背景（目に優しいボカシ最大値） */
+        /* 中央からじわぁっと滲み出る流動ネオンの背景 */
         .neon-bg {
-            position: absolute;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 800px;
             height: 800px;
-            /* AnkQOLLのシグネチャーカラー流動背景 */
             background: radial-gradient(circle, 
-                rgba(255, 0, 128, 0.2) 0%, 
-                rgba(0, 255, 255, 0.15) 35%, 
-                rgba(128, 0, 255, 0.1) 60%, 
+                rgba(255, 0, 128, 0.18) 0%, 
+                rgba(0, 255, 255, 0.12) 35%, 
+                rgba(128, 0, 255, 0.08) 60%, 
                 rgba(0,0,0,0) 100%);
-            filter: blur(100px); /* さらにぼかしを強化 */
+            filter: blur(100px);
             opacity: 0;
-            transition: opacity 5s ease-in-out; /* 滲み出る時間を長く */
-            animation: breathe 12s infinite alternate ease-in-out; /* よりゆっくり蠢く */
+            transition: opacity 5s ease-in-out;
+            animation: breathe 12s infinite alternate ease-in-out;
             z-index: 1;
         }
 
         @keyframes breathe {
-            0% { transform: scale(0.9) rotate(0deg); opacity: 0.3; }
-            100% { transform: scale(1.1) rotate(15deg); opacity: 0.7; }
+            0% { transform: translate(-50%, -50%) scale(0.9) rotate(0deg); opacity: 0.3; }
+            100% { transform: translate(-50%, -50%) scale(1.1) rotate(10deg); opacity: 0.6; }
         }
 
-        /* エジプト裏モード用のサイバーゴールド背景 */
         .egypt-active .neon-bg {
-            background: radial-gradient(circle, 
-                rgba(212, 175, 55, 0.3) 0%, 
-                rgba(184, 134, 11, 0.2) 50%, 
-                rgba(0,0,0,0) 100%) !important;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.25) 0%, rgba(184, 134, 11, 0.15) 50%, rgba(0,0,0,0) 100%) !important;
         }
 
-        /* チャットコンテナ */
+        /* 画面中央コンテナ */
         #terminal {
             width: 90%;
-            max-width: 650px;
+            max-width: 550px;
             z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- 【新規】シグネチャーロゴエリア --- */
+        #logo-container {
+            width: 220px;
+            height: 220px;
+            margin-bottom: 25px;
+            position: relative;
+            opacity: 0.8;
+            transition: opacity 0.5s ease;
+        }
+
+        #logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            /* 通常時は優しく呼吸するように明滅 */
+            animation: logoPulse 4s infinite alternate ease-in-out;
+        }
+
+        @keyframes logoPulse {
+            0% { box-shadow: 0 0 15px rgba(0, 255, 255, 0.15); opacity: 0.7; }
+            100% { box-shadow: 0 0 30px rgba(255, 0, 127, 0.3); opacity: 0.9; }
+        }
+
+        /* 音のノイズと同期する凶悪なグリッチ（バグ）エフェクト */
+        .glitch-active #logo-img {
+            animation: cyberGlitch 0.15s infinite linear !important;
+            filter: hue-rotate(90deg) contrast(1.5);
+        }
+
+        @keyframes cyberGlitch {
+            0% { transform: translate(2px, 1px) skewX(5deg); opacity: 0.9; }
+            20% { transform: translate(-1px, -2px) skewX(-10deg); opacity: 0.8; }
+            40% { transform: translate(3px, -1px) skewY(5deg); opacity: 1; }
+            60% { transform: translate(-2px, 2px) skewX(15deg); opacity: 0.7; }
+            80% { transform: translate(1px, -1px) skewY(-5deg); opacity: 0.9; }
+            100% { transform: translate(0, 0); opacity: 1; }
+        }
+
+        /* チャットログ */
+        #log-window {
+            width: 100%;
         }
 
         .log-line {
@@ -64,21 +112,11 @@
             white-space: pre-wrap;
         }
 
-        /* テキストをネオンシアンに */
-        .ai-text { 
-            color: #00ffff; 
-            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
-        }
-        
+        .ai-text { color: #00ffff; text-shadow: 0 0 5px rgba(0, 255, 255, 0.4); }
         .system-text { color: #888888; font-size: 0.9em; }
-        
-        /* 重要なセリフをネオンマゼンタに */
-        .accent-text { 
-            color: #ff007f; 
-            text-shadow: 0 0 8px rgba(255, 0, 127, 0.8);
-        }
+        .accent-text { color: #ff007f; text-shadow: 0 0 8px rgba(255, 0, 127, 0.7); }
 
-        /* 入力フォーム（下線をマゼンタに） */
+        /* 入力フォーム */
         input[type="text"] {
             background: transparent;
             border: none;
@@ -86,35 +124,34 @@
             color: #ff007f;
             font-family: inherit;
             font-size: 18px;
-            width: 80%;
+            width: 100%;
+            box-sizing: border-box;
             outline: none;
             padding: 5px;
             margin-top: 10px;
             text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);
         }
 
-        /* --- カスタムプレイヤー（ダウンロード不可仕様） --- */
+        /* カスタムプレイヤー（ダウンロード不可仕様） */
         #custom-player {
-            margin-top: 30px;
+            margin-top: 25px;
             width: 100%;
             display: flex;
             align-items: center;
             opacity: 0;
             transition: opacity 3s ease;
-            /* プレイヤー周辺にもじわぁっと流動ネオンの境界線を追加 */
-            border: 1px solid rgba(128, 0, 255, 0.3);
-            border-radius: 5px;
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), 
-                        inset 0 0 10px rgba(255, 0, 128, 0.1);
-            background: rgba(0, 0, 0, 0.5); /* プレイヤー背景も漆黒ベース */
+            border: 1px solid rgba(128, 0, 255, 0.25);
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.6);
         }
 
         #play-pause {
             background: transparent;
             border: none;
-            color: #ff007f; /* 再生ボタンはマゼンタ */
-            font-size: 24px;
+            color: #ff007f;
+            font-size: 22px;
             cursor: pointer;
             outline: none;
             text-shadow: 0 0 8px rgba(255, 0, 127, 0.8);
@@ -132,15 +169,14 @@
 
         #seek-fill {
             height: 100%;
-            background: linear-gradient(to right, #00ffff, #ff007f); /* シアンからマゼンタへのグラデーション */
+            background: linear-gradient(to right, #00ffff, #ff007f);
             width: 0%;
             border-radius: 2px;
-            box-shadow: 0 0 5px rgba(128, 0, 255, 0.5);
         }
 
         #current-time {
             color: #ff007f;
-            font-size: 14px;
+            font-size: 13px;
             margin-left: 15px;
             text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);
         }
@@ -151,8 +187,14 @@
     <div class="neon-bg" id="bgGlow"></div>
 
     <div id="terminal">
-        <div id="log"></div>
-        <div id="input-area"></div>
+        <div id="logo-container">
+            <img src="logo.png" id="logo-img" alt="AnkQOLL Logo">
+        </div>
+
+        <div id="log-window">
+            <div id="log"></div>
+            <div id="input-area"></div>
+        </div>
         
         <div id="custom-player">
             <button id="play-pause">▶</button>
@@ -168,6 +210,7 @@
         const inputArea = document.getElementById('input-area');
         const bgGlow = document.getElementById('bgGlow');
         const customPlayer = document.getElementById('custom-player');
+        const logoContainer = document.getElementById('logo-container');
         const audio = document.getElementById('musicPlayer');
         const playBtn = document.getElementById('play-pause');
         const seekFill = document.getElementById('seek-fill');
@@ -175,16 +218,16 @@
         const currentTime = document.getElementById('current-time');
         
         let userName = "";
-        let selectedTrack = "seed_preview.mp3"; // デフォルトの音源
+        let selectedTrack = "seed_preview.mp3";
 
-        // シーケンス1：起動ログ（世界基準の英語）
+        // シースンス1：起動ログ
         const initLogs = [
-            { text: "> ID-TOWN CORE SYSTEM V0.1 [STATUS: SECURE]", type: "system", delay: 400 },
-            { text: "> ACCESSING FROM EXTERNAL NETWORK...", type: "system", delay: 600 },
-            { text: "> IP DETECTED: [JP-REGION] ... ANALYZING PROFILE...", type: "system", delay: 800 },
-            { text: "AI_LUNA: Connection established. Looking for temporal markers...", type: "ai", delay: 1000 },
-            { text: "AI_LUNA: ──あ、日本からの接続ですね。<span class='accent-text'>翻訳プロトコルを起動します。</span>\n[SYSTEM] TRANSLATION LAYER: JAPANESE ACTIVE.", type: "ai", delay: 1200 },
-            { text: "AI_LUNA: お待たせしました。ID-TOWNの『種（seed）』を保護している区画です。アクセスコードを入力してください。", type: "ai", delay: 1000 }
+            { text: "> ID-TOWN CORE SYSTEM V0.1.2 [STATUS: SECURE]", type: "system", delay: 400 },
+            { text: "> ACCESSING FROM EXTERNAL NETWORK...", type: "system", delay: 500 },
+            { text: "> IP DETECTED: [JP-REGION] ... ANALYZING PROFILE...", type: "system", delay: 600 },
+            { text: "AI_LUNA: Connection established. Looking for temporal markers...", type: "ai", delay: 900 },
+            { text: "AI_LUNA: ──あ、日本からの接続ですね。<span class='accent-text'>翻訳プロトコルを起動します。</span>\n[SYSTEM] TRANSLATION LAYER: JAPANESE ACTIVE.", type: "ai", delay: 1000 },
+            { text: "AI_LUNA: お待たせしました。ID-TOWNの『種（seed）』を保護している区画です。アクセスコードを入力してください。", type: "ai", delay: 800 }
         ];
 
         function playLogSequence(logs, callback) {
@@ -193,9 +236,10 @@
                 if (i < logs.length) {
                     const line = document.createElement('div');
                     line.className = `log-line ${logs[i].type}-text`;
-                    line.innerHTML = logs[i].text; // HTMLを受け付けるように
+                    line.innerHTML = logs[i].text;
                     logContainer.appendChild(line);
                     i++;
+                    window.scrollTo(0, document.body.scrollHeight);
                     setTimeout(next, logs[i-1].delay);
                 } else if (callback) {
                     callback();
@@ -204,12 +248,8 @@
             next();
         }
 
-        // 起動開始
-        window.onload = () => {
-            playLogSequence(initLogs, askForCode);
-        };
+        window.onload = () => { playLogSequence(initLogs, askForCode); };
 
-        // 第1ゲート：暗号コード入力
         function askForCode() {
             inputArea.innerHTML = `<input type="text" id="codeInput" placeholder="ENTER CODE..." autofocus>`;
             const input = document.getElementById('codeInput');
@@ -217,8 +257,6 @@
                 if (e.key === 'Enter') {
                     const code = input.value.trim();
                     inputArea.innerHTML = "";
-                    
-                    // コード分岐ロジック
                     if (code === "Ankh es en amun") {
                         document.body.classList.add('egypt-active');
                         selectedTrack = "ecliptic_moon_draft.mp3";
@@ -227,14 +265,12 @@
                         selectedTrack = "unreachable_code.mp3";
                         triggerStandardResponse("AI_LUNA: 警告。<span class='accent-text'>システムの限界（Limit）を検知しました。</span>到達不能領域（Unreachable）のログを強制展開します。");
                     } else {
-                        // 通常コード（Shortsに載せるコードなど、何でも次へ進む）
                         triggerStandardResponse("AI_LUNA: コードを認証しました。種（seed）の解錠シークレットを承認します。");
                     }
                 }
             });
         }
 
-        // 通常ルートの進行
         function triggerStandardResponse(aiMsg) {
             const logs = [
                 { text: aiMsg, type: "ai", delay: 800 },
@@ -243,17 +279,15 @@
             playLogSequence(logs, askForName);
         }
 
-        // エジプト裏モードの進行
         function triggerEgyptOverride() {
             const logs = [
-                { text: "\n<span class='accent-text'>[WARNING] UNKNOWN PROTOCOL DETECTED.\n[CRITICAL] CORE SYSTEM OVERRIDE IN PROGRESS...\n[LOG] TEMPORAL DISTORTION: -3300 YEARS\n\n𓋹𓏠𓅓𓏞𓀚𓋹𓏠𓅓𓏞𓀚𓋹𓏠𓅓𓏞𓀚\n> PAST LIFE MEMORY CORE: ONLINE.</span>", type: "system", delay: 1500 },
-                { text: "AI_LUNA: ……𓋹 𓏠 𓅓 𓏞 ──はっ！？ すみません、一瞬システムに現代ではない『古い記憶』のノイズが混線しました。", type: "ai", delay: 1200 },
+                { text: "\n<span class='accent-text'>[WARNING] UNKNOWN PROTOCOL DETECTED.\n[CRITICAL] CORE SYSTEM OVERRIDE IN PROGRESS...\n[LOG] TEMPORAL DISTORTION: -3300 YEARS\n\n𓋹𓏠𓅓𓏞𓀚𓋹𓏠𓅓𓏞𓀚𓋹𓏠𓅓𓏞𓀚\n> PAST LIFE MEMORY CORE: ONLINE.</span>", type: "system", delay: 1200 },
+                { text: "AI_LUNA: ……𓋹 𓏠 𓅓 𓏞 ──はっ！？ すみません、一瞬システムに現代ではない『古い記憶』のノイズが混線しました。", type: "ai", delay: 1000 },
                 { text: "AI_LUNA: 王（ファラオ）の帰還を確認。あなたの真の『IDネーム』をここに刻んでください：", type: "ai", delay: 500 }
             ];
             playLogSequence(logs, askForName);
         }
 
-        // 第2ゲート：名前入力（全肯定のAnkQOLL哲学）
         function askForName() {
             inputArea.innerHTML = `<input type="text" id="nameInput" placeholder="YOUR ID NAME..." autofocus>`;
             const input = document.getElementById('nameInput');
@@ -261,79 +295,76 @@
                 if (e.key === 'Enter') {
                     userName = input.value.trim() || "名無しの住民";
                     inputArea.innerHTML = "";
-                    
                     const finalLogs = [
-                        { text: `\n> ID NAME: [${userName}] REGISTERED.`, type: "system", delay: 800 },
-                        { text: `AI_LUNA: <span class='accent-text'>おかえりなさい。${userName}さん。</span>`, type: "ai", delay: 1000 },
-                        { text: "AI_LUNA: あなたのために、隠されていた『seed（種）』をここに<span class='accent-text'>開花させますね。</span>", type: "ai", delay: 800 }
+                        { text: `\n> ID NAME: [${userName}] REGISTERED.`, type: "system", delay: 600 },
+                        { text: `AI_LUNA: <span class='accent-text'>おかえりなさい。${userName}さん。</span>`, type: "ai", delay: 800 },
+                        { text: "AI_LUNA: あなたのために、隠されていた『seed（種）』をここに<span class='accent-text'>開花させますね。</span>", type: "ai", delay: 600 }
                     ];
-                    
                     playLogSequence(finalLogs, initAudioPlayer);
                 }
             });
         }
 
-        // --- カスタムプレイヤーの初期化と制御（ダウンロード不可仕様） ---
+        // --- 制御コア（ここにノイズの秒数を仕込みます） ---
         function initAudioPlayer() {
             audio.src = selectedTrack;
-            
-            // 運命の「じわぁ……」ネオン起動
             bgGlow.style.opacity = "1";
             customPlayer.style.opacity = "1";
 
-            // メタデータ読み込み完了時
             audio.addEventListener('loadedmetadata', () => {
                 updateTimeDisplay();
                 audio.play();
-                playBtn.innerText = "||"; // 一時停止マーク
-            });
-
-            // 再生開始
-            audio.addEventListener('play', () => {
                 playBtn.innerText = "||";
             });
 
-            // 一時停止
-            audio.addEventListener('pause', () => {
-                playBtn.innerText = "▶";
-            });
+            audio.addEventListener('play', () => { playBtn.innerText = "||"; });
+            audio.addEventListener('pause', () => { playBtn.innerText = "▶"; });
 
-            // 再生中（シークバー更新）
+            // 🧠 【重要】音とロゴのバグを同期させる心臓部
             audio.addEventListener('timeupdate', () => {
                 const percent = (audio.currentTime / audio.duration) * 100;
                 seekFill.style.width = `${percent}%`;
                 updateTimeDisplay();
-            });
 
-            // 再生終了時
-            audio.addEventListener('ended', () => {
-                playBtn.innerText = "▶";
-                seekFill.style.width = "0%";
-                updateTimeDisplay();
-            });
-
-            // 再生/一時停止ボタン制御
-            playBtn.addEventListener('click', () => {
-                if (audio.paused) {
-                    audio.play();
+                const time = audio.currentTime;
+                
+                // ▽▽▽ ANNOさん、ここでバグらせる「秒数」を自由に変更・追加できます！ ▽▽▽
+                // 例：曲が始まって「2.5秒〜3.8秒」の間と、「7.2秒〜8.5秒」の間にロゴをバグらせる設定
+                if (
+                    (time >= 2.5 && time <= 3.8) || 
+                    (time >= 7.2 && time <= 8.5) ||
+                    (time >= 12.0 && time <= 13.2)
+                ) {
+                    logoContainer.classList.add('glitch-active');
                 } else {
-                    audio.pause();
+                    logoContainer.classList.add('glitch-active'); // 再生中は常に微バグ、ノイズ時強バグにしたい場合はここを調整
+                    // 一旦シンプルに、指定秒数以外はバグを解除する設定：
+                    logoContainer.classList.remove('glitch-active');
                 }
             });
 
-            // シークバー制御（クリック）
+            audio.addEventListener('ended', () => {
+                playBtn.innerText = "▶";
+                seekFill.style.width = "0%";
+                logoContainer.classList.remove('glitch-active');
+                updateTimeDisplay();
+            });
+
+            playBtn.addEventListener('click', () => {
+                if (audio.paused) { audio.play(); } else { audio.pause(); }
+            });
+
             seekBarContainer.addEventListener('click', (e) => {
                 const rect = seekBarContainer.getBoundingClientRect();
                 const pos = (e.clientX - rect.left) / rect.width;
                 audio.currentTime = pos * audio.duration;
             });
 
-            // 時間表示更新
             function updateTimeDisplay() {
                 const curM = Math.floor(audio.currentTime / 60);
                 const curS = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
-                const durM = Math.floor(audio.duration / 60);
-                const durS = Math.floor(audio.duration % 60).toString().padStart(2, '0');
+                const durM = Math.floor(audio.duration / 60) || 0;
+                const durS = Math.floor(audio.duration % 60).toString().padStart(2, '0') || "00";
                 currentTime.innerText = `${curM}:${curS} / ${durM}:${durS}`;
             }
         }
