@@ -383,16 +383,16 @@
             }
         }
         // 🎧 耳でタイミングを捉えるためのDJデバッグカウンター
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 's' || e.key === 'S') {
-                console.log(`【ノイズ位置】: ${audio.currentTime.toFixed(2)} 秒`);
-                // 画面にも一時的に表示させたい場合は、チャットログに流し込む
-                const debugLine = document.createElement('div');
-                debugLine.className = 'log-line system-text';
-                debugLine.innerText = `>> DEBUG TIMING: [ ${audio.currentTime.toFixed(2)} ] SEC`;
-                logContainer.appendChild(debugLine);
-            }
-        });
+        // window.addEventListener('keydown', (e) => {
+        //     if (e.key === 's' || e.key === 'S') {
+        //         console.log(`【ノイズ位置】: ${audio.currentTime.toFixed(2)} 秒`);
+        //         // 画面にも一時的に表示させたい場合は、チャットログに流し込む
+        //         const debugLine = document.createElement('div');
+        //         debugLine.className = 'log-line system-text';
+        //         debugLine.innerText = `>> DEBUG TIMING: [ ${audio.currentTime.toFixed(2)} ] SEC`;
+        //         logContainer.appendChild(debugLine);
+        //     }
+        // });
     </script>
 </body>
 </html>
