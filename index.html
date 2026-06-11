@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ID-TOWN // CORE SYSTEM v0.1.6</title>
+    <title>ID-TOWN // CORE SYSTEM v0.1.7</title>
     <style>
         html {
             height: 100%;
@@ -21,9 +21,37 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* 根元はスクロール可能にするためにstart */
+            justify-content: flex-start;
             align-items: center;
             box-sizing: border-box;
+        }
+
+        /* 降ってくるヒエログリフ用のコンテナ */
+        #hiero-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        /* 個別のヒエログリフ文字 */
+        .hiero-char {
+            position: absolute;
+            color: rgba(212, 175, 55, 0.4); /* 古代エジプトのゴールド */
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
+            font-size: 24px;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-50px); opacity: 0; }
+            10% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
         }
 
         /* 中央からじわぁっと滲み出る流動ネオンの背景 */
@@ -55,7 +83,6 @@
             background: radial-gradient(circle, rgba(212, 175, 55, 0.25) 0%, rgba(184, 134, 11, 0.15) 50%, rgba(0,0,0,0) 100%) !important;
         }
 
-        /* 【大修正】魔法の margin: auto 0; を追加 */
         #terminal {
             width: 90%;
             max-width: 550px;
@@ -63,7 +90,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* ★画面の高さに余裕があるPCでは上下中央に、高さが足りないスマホでは上から綺麗に並びます */
             margin: auto 0; 
         }
 
@@ -95,7 +121,7 @@
             100% { box-shadow: 0 0 30px rgba(255, 0, 127, 0.3); opacity: 0.9; }
         }
 
-        /* グリッチエフェクト（モノトーン反転仕様） */
+        /* グリッチエフェクト */
         .glitch-active #logo-img {
             animation: cyberGlitch 0.15s infinite linear !important;
             filter: grayscale(1) brightness(1.5) contrast(1.2);
@@ -184,32 +210,18 @@
             text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);
         }
 
-        /* 📱 スマホ画面用のレスポンシブ最適化 */
         @media (max-width: 480px) {
-            body {
-                padding: 15px 0;
-            }
-            #logo-container {
-                width: 150px;
-                height: 150px;
-                margin-top: 20px;
-                margin-bottom: 15px;
-            }
-            input[type="text"] {
-                font-size: 16px;
-            }
-            .log-line {
-                font-size: 14px;
-                margin-bottom: 10px;
-            }
-            #custom-player {
-                padding: 10px;
-            }
+            body { padding: 15px 0; }
+            #logo-container { width: 150px; height: 150px; margin-top: 20px; margin-bottom: 15px; }
+            input[type="text"] { font-size: 16px; }
+            .log-line { font-size: 14px; margin-bottom: 10px; }
+            #custom-player { padding: 10px; }
         }
     </style>
 </head>
 <body>
 
+    <div id="hiero-container"></div>
     <div class="neon-bg" id="bgGlow"></div>
 
     <div id="terminal">
@@ -219,7 +231,7 @@
         </div>
 
         <div id="logo-container">
-            <img src="logo.png" id="logo-img" alt="AnkQOLL Logo">
+            <img src="logo.png" id="logo-img" alt="AnkQOLL Target">
         </div>
         
         <div id="custom-player">
@@ -237,6 +249,7 @@
         const bgGlow = document.getElementById('bgGlow');
         const customPlayer = document.getElementById('custom-player');
         const logoContainer = document.getElementById('logo-container');
+        const logoImg = document.getElementById('logo-img');
         const audio = document.getElementById('musicPlayer');
         const playBtn = document.getElementById('play-pause');
         const seekFill = document.getElementById('seek-fill');
@@ -244,10 +257,15 @@
         const currentTime = document.getElementById('current-time');
         
         let userName = "";
+        
+        // --- 設定値の初期化 ---
         let selectedTrack = "seed_preview.mp3";
+        let selectedImage = "logo.png";
+        let useGlitch = false;
+        let useHiero = false;
 
         const initLogs = [
-            { text: "> ID-TOWN CORE SYSTEM V0.1.6 [STATUS: SECURE]", type: "system", delay: 400 },
+            { text: "> ID-TOWN CORE SYSTEM V0.1.7 [STATUS: SECURE]", type: "system", delay: 400 },
             { text: "> ACCESSING FROM EXTERNAL NETWORK...", type: "system", delay: 500 },
             { text: "> IP DETECTED: [JP-REGION] ... ANALYZING PROFILE...", type: "system", delay: 600 },
             { text: "AI_LUNA: Connection established. Looking for temporal markers...", type: "ai", delay: 900 },
@@ -280,17 +298,40 @@
             const input = document.getElementById('codeInput');
             input.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    const code = input.value.trim();
+                    // スペースを削除し、全て小文字に変換して判定を強固にする
+                    const code = input.value.trim().toLowerCase().replace(/\s+/g, '');
                     inputArea.innerHTML = "";
-                    if (code === "Ankh es en amun") {
-                        document.body.classList.add('egypt-active');
-                        selectedTrack = "ecliptic_moon_draft.mp3";
-                        triggerEgyptOverride();
-                    } else if (code.toLowerCase() === "wanna try limit break?") {
-                        selectedTrack = "unreachable_code.mp3";
+
+                    // ▼▼ パスワード分岐処理 ▼▼
+                    if (code === "moonandtherabbit") {
+                        selectedTrack = "Moon and the rabbit.mp3";
+                        selectedImage = "Moon and the rabbit.png";
+                        useGlitch = true;
+                        useHiero = false;
+                        triggerStandardResponse("AI_LUNA: コードを認証しました。<span class='accent-text'>月のウサギが跳ねる準備が整いました。</span>");
+                    } 
+                    else if (code === "unreachablecode") {
+                        selectedTrack = "Unreachable Code.mp3";
+                        selectedImage = "Unreachable Code.png";
+                        useGlitch = false;
+                        useHiero = false;
                         triggerStandardResponse("AI_LUNA: 警告。<span class='accent-text'>システムの限界（Limit）を検知しました。</span>到達不能領域（Unreachable）のログを強制展開します。");
-                    } else {
-                        triggerStandardResponse("AI_LUNA: コードを認証しました。種（seed）の解錠シークレットを承認します。");
+                    } 
+                    else if (code === "eclipticmoon" || code === "ankhesenamun") {
+                        selectedTrack = "Ecliptic moon.mp3";
+                        selectedImage = "Ecliptic moon.png";
+                        useGlitch = false;
+                        useHiero = true; // ヒエログリフフラグON
+                        document.body.classList.add('egypt-active');
+                        triggerEgyptOverride();
+                    } 
+                    else {
+                        // 該当しない場合のフォールバック（デバッグ用）
+                        selectedTrack = "seed_preview.mp3";
+                        selectedImage = "logo.png";
+                        useGlitch = false;
+                        useHiero = false;
+                        triggerStandardResponse("AI_LUNA: 不明なコードですが、一部の権限でゲストアクセスを許可します。");
                     }
                 }
             });
@@ -330,10 +371,39 @@
             });
         }
 
+        // --- 降ってくるヒエログリフ演出（マトリックス風） ---
+        function startHieroglyphs() {
+            const chars = ["𓋹", "𓏠", "𓅓", "𓏞", "𓀚", "𓀀", "𓀁", "𓀂", "𓀃", "𓀄", "𓁀", "𓁁", "𓁂", "𓁃"];
+            const container = document.getElementById('hiero-container');
+            
+            setInterval(() => {
+                const el = document.createElement('div');
+                el.className = 'hiero-char';
+                el.innerText = chars[Math.floor(Math.random() * chars.length)];
+                
+                // ランダムな位置とサイズ、落下速度を設定
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                el.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                
+                container.appendChild(el);
+                
+                // アニメーションが終わったらDOMから削除
+                setTimeout(() => { el.remove(); }, 6000);
+            }, 250); // 0.25秒に1文字降らす
+        }
+
         // --- ⚙️ 超高精度・爆速同期エンジン（60fpsループ） ---
         function initAudioPlayer() {
+            // パスワードに応じた画像と音声をセット
+            logoImg.src = selectedImage;
             audio.src = selectedTrack;
             
+            // ヒエログリフフラグがONなら発動
+            if (useHiero) {
+                startHieroglyphs();
+            }
+
             bgGlow.style.opacity = "1";
             customPlayer.style.opacity = "1";
             logoContainer.style.opacity = "1";
@@ -351,20 +421,23 @@
                 }
 
                 const time = audio.currentTime;
-                
                 const percent = (time / audio.duration) * 100;
                 seekFill.style.width = `${percent}%`;
                 updateTimeDisplay();
 
-                // 【気合の完全調律】ANNOさんが合わせた魂のタイミング秒数
-                if (
-                    (time >= 4.07 && time <= 4.40) ||  
-                    (time >= 5.60 && time <= 6.3) ||  
-                    (time >= 7.35 && time <= 7.72) ||   
-                    (time >= 10.90 && time <= 11.38) || 
-                    (time >= 14.10 && time <= 14.59)      
-                ) {
-                    logoContainer.classList.add('glitch-active');
+                // ▼ useGlitchがtrueの時だけ、魂のタイミングで発動 ▼
+                if (useGlitch) {
+                    if (
+                        (time >= 4.07 && time <= 4.40) ||  
+                        (time >= 5.60 && time <= 6.3) ||  
+                        (time >= 7.35 && time <= 7.72) ||   
+                        (time >= 10.90 && time <= 11.38) || 
+                        (time >= 14.10 && time <= 14.59)      
+                    ) {
+                        logoContainer.classList.add('glitch-active');
+                    } else {
+                        logoContainer.classList.remove('glitch-active');
+                    }
                 } else {
                     logoContainer.classList.remove('glitch-active');
                 }
